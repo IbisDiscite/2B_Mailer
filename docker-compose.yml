@@ -1,0 +1,21 @@
+version: '2'
+services:
+  web:
+    image: Mailer-ms
+    build: ./Web
+    command: node index.js
+    ports:
+      - "4003:4003"
+    volumes:
+      - ./Web:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - "mongo"
+  mongo:
+    image: "mongo"
+    ports:
+      - "27017-27017"
+  adminmongo:
+    image: "pcberriop/adminmongo"
+    ports:
+      - "1234:1234"
