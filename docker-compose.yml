@@ -1,7 +1,7 @@
 version: '2'
 services:
   web:
-    image: Mailer-ms
+    image: docker-node-express-mongoapp
     build: ./Web
     command: node index.js
     ports:
@@ -16,6 +16,6 @@ services:
     ports:
       - "27017-27017"
   adminmongo:
-    image: "pcberriop/adminmongo"
+    image: "mrvautin/adminmongo"
     ports:
       - "1234:1234"
