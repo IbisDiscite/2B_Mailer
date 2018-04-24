@@ -1,7 +1,7 @@
 console.log("Yeah")
 
-const express = required('express')
-const database = required('./database')
+const express = require('express')
+const database = require('./database')
 const app = express()
 
 database.initializeMongo();
