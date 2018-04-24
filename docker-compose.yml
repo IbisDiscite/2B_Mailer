@@ -3,7 +3,7 @@ services:
   web:
     image: docker-node-express-mongoapp
     build: ./Web
-    command: node index.js
+    command: bash -c "sleep 40 && node index.js"
     ports:
       - "4003:4003"
     volumes:
