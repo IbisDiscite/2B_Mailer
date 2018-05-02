@@ -77,7 +77,7 @@ router.patch('/:messageId', (req, res, next) => {
     const id = req.params.messageId;
     const updateOps ={};
     for (const ops of req.body){
-        updateOps[ops.propSubject] = ops.value;
+        updateOps[ops.propName] = ops.value;
     }
     Message.update({_id: id},{$set: updateOps })
         .exec()
