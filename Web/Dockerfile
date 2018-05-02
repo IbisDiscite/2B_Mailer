@@ -2,6 +2,8 @@ FROM node
 
 WORKDIR /usr/src/app
 
+RUN npm install --global nodemon
+
 COPY package.json .
 
 RUN npm install
