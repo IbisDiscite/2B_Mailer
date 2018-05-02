@@ -19,28 +19,40 @@ router.post('/',(req, res, next)=>{
     message
         .save()
         .then(result => {
-        console.log(result);
+            console.log(result);
+            res.status(201).json({
+                message: 'Handling POST requests to /messages',
+                createdMessage: result
+            });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({
+                error: err
+            });
+        });
 
-    res.status(201).json({
-        message: 'Handling POST requests to /messages',
-        createdMessage: message
-    });
+
 });
 
 router.get('/:messageId', (req, res, next)=>{
     const id = req.params.messageId;
-
-    if(id === 'special'){
-        res.status(200).json({
-            message: 'You discovered the special ID'
+    Message.findById(id)
+        .exec()
+        .then(doc => {
+            console.log(doc);
+            if (doc){
+                res.status(200).json(doc);
+            } else {
+                res.status(404).json(message: 'No valid entry found for provided Id');
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
         });
-    } else {
-        res.status(200).json({
-            message: 'You passed an ID'
-        });
-    }
 });
 
 router.patch('/:messageId', (req, res, next) => {
