@@ -3,7 +3,7 @@ services:
   mailer:
     image: docker-node-express-mongoapp
     build: ./Web
-    command: bash -c "sleep 40 && node index.js"
+    command: bash -c "sleep 40 && npm start"
     ports:
       - "4003:4003"
     volumes:
