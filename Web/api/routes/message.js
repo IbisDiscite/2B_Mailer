@@ -44,7 +44,9 @@ router.get('/:messageId', (req, res, next)=>{
             if (doc){
                 res.status(200).json(doc);
             } else {
-                res.status(404).json(message: 'No valid entry found for provided Id');
+                res.status(404).json({
+                        message: 'No valid entry found for provided Id'
+                });
             }
         })
         .catch(err => {
