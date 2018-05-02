@@ -8,8 +8,13 @@ router.get('/', (req, res, next)=>{
 });
 
 router.post('/',(req, res, next)=>{
-    res.status(200).json({
-        message: 'Handling POST requests to /messages'
+    const message = {
+        subject: req.body.subject,
+        text: req.body.text
+    };
+    res.status(201).json({
+        message: 'Handling POST requests to /messages',
+        createdMessage: message
     });
 });
 
