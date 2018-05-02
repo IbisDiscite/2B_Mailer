@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+
+const Message = require('../models/message');
 
 router.get('/', (req, res, next)=>{
     res.status(200).json({
@@ -8,10 +11,18 @@ router.get('/', (req, res, next)=>{
 });
 
 router.post('/',(req, res, next)=>{
-    const message = {
+    const message = new Message({
+        _id: new mongoose.Types.ObjectId(),
         subject: req.body.subject,
         text: req.body.text
-    };
+});
+    message
+        .save()
+        .then(result => {
+        console.log(result);
+        })
+        .catch(err => console.log(err));
+
     res.status(201).json({
         message: 'Handling POST requests to /messages',
         createdMessage: message
