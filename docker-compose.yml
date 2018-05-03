@@ -1,5 +1,36 @@
 version: '2'
 services:
+  #Inverse Proxy
+  ibis-proxy:
+    image: dafrodriguezro/2b_proxy
+    depends_on:
+      - api-gateway
+    ports:
+      - "80:80"
+  #Api Gateway
+  api-gateway:
+    image: dafrodriguezro/2b_api
+    environment:
+      PORT: '5000'
+      SHOW_URLS: 'true'
+      AUTHENTICATION_PORT: '4000'
+      AUTHENTICATION_ENTRY: 'auth'
+      AUTH_PORT: '4000'
+      AUTH_ENTRY: 'ldap/'
+      EXAMPLES_PORT: '4001'
+      EXAMPLES_ENTRY: 'examples/'
+      UNITS_ENTRY: 'units/'
+      TODAYSLESSON_PORT: '4002'
+      TODAYSLESSON_ENTRY: 'todayslessons/'
+      MAILER_PORT: '4003'
+      MAILER_ENTRY: 'messages/'
+      CHAT_PORT: '4004'
+      CHAT_ENTRY: 'chat/'
+      AWARDS_PORT: '4005'
+      AWARDS_ENTRY: 'awards/'
+      EXERCISES_PORT: '4040'
+      EXERCISES_ENTRY: 'exercises/'
+  #MAILER
   mailer:
     image: docker-node-express-mongoapp
     build: ./Web
@@ -19,3 +50,94 @@ services:
     image: "mrvautin/adminmongo"
     ports:
       - "1234:1234"
+  #Authentication MS
+  auth-db:
+    image: mysql:5.7
+    ports:
+      - "3307:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_USER: arquisoft
+      MYSQL_PASSWORD: 123
+      MYSQL_DATABASE: auth
+      MYSQL_HOST: auth-db
+  auth-ms:
+    image: joahernandezca/2b_authentication
+    command: bash -c "sleep 40 && rm -f tmp/pids/server.pid && bundle exec rails db:migrate && bundle exec rails db:seed && bundle exec rails s -p 4000 -b '0.0.0.0'"
+    environment:
+      PORT: '4000'
+    depends_on:
+      - auth-db
+  #Examples MS
+  examples-db:
+    image: mysql:5.7
+    ports:
+      - "3309:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_USER: arquisoft
+      MYSQL_PASSWORD: 123
+      MYSQL_DATABASE: examples
+      MYSQL_HOST: examples-db
+  examples-ms:
+    image: dafrodriguezro/2b_example
+    command: bash -c "sleep 40 && rm -f tmp/pids/server.pid && bundle exec rails db:migrate && bundle exec rails db:seed && bundle exec rails s -p 4001 -b '0.0.0.0'"
+    environment:
+        PORT: '4001'
+    depends_on:
+        - examples-db
+  #Todayslesson MS
+  todayslesson-ms:
+    image: nicolaszon/2b_todayslesson
+    environment:
+      PORT: '4002'
+  #LDAP
+  ibis-ldap:
+    image: osixia/openldap:1.1.8
+    container_name: ibis-ldap
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      LDAP_LOG_LEVEL: "256"
+      LDAP_ORGANISATION: "Ibis Dicsite"
+      LDAP_DOMAIN: "arqsoft.unal.edu.co"
+      LDAP_BASE_DN: ""
+      LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_CONFIG_PASSWORD: "config"
+      LDAP_READONLY_USER: "false"
+      #LDAP_READONLY_USER_USERNAME: "readonly"
+      #LDAP_READONLY_USER_PASSWORD: "readonly"
+      LDAP_BACKEND: "hdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_PROTOCOL_MIN: "3.1"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      #LDAP_REPLICATION_CONFIG_SYNCPROV: "binddn="cn=admin,cn=config" bindmethod=simple credentials=$LDAP_CONFIG_PASSWORD searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical"
+      #LDAP_REPLICATION_DB_SYNCPROV: "binddn="cn=admin,$LDAP_BASE_DN" bindmethod=simple credentials=$LDAP_ADMIN_PASSWORD searchbase="$LDAP_BASE_DN" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical"
+      #LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:['ldap://ldap.example.org','ldap://ldap2.example.org']"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/lib/ldap
+      - /etc/ldap/slapd.d
+      - /container/service/slapd/assets/certs/
+    ports:
+      - "389:389"
+      - "636:636"
+    hostname: "arqsoft.org"
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "ibis-ldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "8085:80"
+    links:
+      - ibis-ldap
